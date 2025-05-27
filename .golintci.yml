@@ -1,0 +1,69 @@
+# Configuration for golangci-lint
+# See https://golangci-lint.run/ for more information.
+run:
+  concurrency: 4
+  timeout: 5m
+  # Include test files or not
+  tests: true
+
+linters:
+  enable:
+    - asasalint
+    - asciicheck
+    - bidichk
+    - bodyclose
+    - decorder
+    - dogsled
+    - dupword
+    - errcheck
+    - errname
+    - errorlint
+    - goconst
+    - gofumpt
+    - gosec
+    - gosimple
+    - govet
+    - grouper
+    - ineffassign
+    - interfacebloat
+    - misspell
+    - nestif
+    - nilerr
+    - nilnil
+    - nlreturn
+    - nonamedreturns
+    - staticcheck
+    - typecheck
+    - unused
+    - varnamelen
+    - wrapcheck
+    - unparam       # Reports unused function parameters
+    - exportloopref # Checks for pointers to enclosing loop variables
+    - nolintlint    # Reports ill-formed or insufficient nolint directives
+    - revive        # Drop-in replacement for golint with additional checks
+
+linters-settings:
+  unused:
+    # Treat code as a program (not as a library)
+    # This means unused exports are also reported
+    check-exported: true
+
+  revive:
+    # Ensure unused parameters are reported
+    rules:
+      - name: unused-parameter
+        severity: warning
+        disabled: false
+      - name: unexported-return
+        severity: warning
+        disabled: false
+
+  unparam:
+    # Report unused function parameters
+    check-exported: true
+
+issues:
+  # Maximum issues count per one linter
+  max-issues-per-linter: 0
+  # Maximum count of issues with the same text
+  max-same-issues: 0

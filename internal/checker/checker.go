@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/joshbeard/gh-action-link-checker/internal/config"
+	"github.com/joshbeard/link-validator/internal/config"
 	"golang.org/x/net/html"
 	"golang.org/x/time/rate"
 )
@@ -224,7 +224,14 @@ func (c *Checker) CheckLinks(urls []string) []LinkResult {
 			defer func() { <-semaphore }()
 
 			// Rate limiting
-			c.limiter.Wait(context.Background())
+			if err := c.limiter.Wait(context.Background()); err != nil {
+				results[index] = LinkResult{
+					URL:      checkURL,
+					Error:    fmt.Sprintf("rate limiter error: %v", err),
+					Duration: "0s",
+				}
+				return
+			}
 
 			result := c.checkSingleLink(checkURL)
 			results[index] = result

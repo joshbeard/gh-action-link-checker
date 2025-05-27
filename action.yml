@@ -1,4 +1,4 @@
-name: 'Link Checker'
+name: 'Link Validator'
 description: 'Check for broken links (4xx, 5xx) on a website using sitemap or crawling'
 author: 'Josh Beard'
 
@@ -20,7 +20,7 @@ inputs:
   user-agent:
     description: 'User agent string for requests'
     required: false
-    default: 'GitHub-Action-Link-Checker/1.0'
+    default: 'GitHub-Action-Link-Validator/1.0'
   exclude-patterns:
     description: 'Comma-separated list of URL patterns to exclude (regex supported)'
     required: false

@@ -1,0 +1,135 @@
+version: 2
+project_name: link-validator
+before:
+  hooks:
+    - go mod tidy
+builds:
+  - id: "link-validator"
+    env:
+      - CGO_ENABLED=0
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    flags:
+      - -trimpath
+    ldflags:
+      - "-s -w -X main.version={{.Version}}"
+    goos:
+      - linux
+      - darwin
+      - freebsd
+    goarch:
+      - amd64
+      - arm64
+    main: ./cmd/link-checker
+    binary: link-validator
+archives:
+  - id: "tarball"
+    ids:
+      - "link-validator"
+    formats: ['tar.gz']
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        formats: ['zip']
+    files: []
+    #   - src: LICENSE
+    #   - src: README.md
+snapshot:
+  version_template: "{{ .Tag }}-next"
+checksum:
+  name_template: 'checksums.txt'
+signs:
+  - artifacts: all
+    args:
+      - "--batch"
+      - "--local-user"
+      - "{{ .Env.GPG_FINGERPRINT }}"
+      - "--output"
+      - "${signature}"
+      - "--detach-sign"
+      - "${artifact}"
+dockers:
+  - id: link-validator-amd64
+    ids:
+      - link-validator
+    use: buildx
+    goos: linux
+    goarch: amd64
+    image_templates:
+      - joshbeard/link-validator:{{ .Tag }}-amd64
+      - joshbeard/link-validator:latest-amd64
+      - ghcr.io/joshbeard/link-validator/link-validator:{{ .Tag }}-amd64
+      - ghcr.io/joshbeard/link-validator/link-validator:latest-amd64
+    extra_files:
+      - "entrypoint.sh"
+    build_flag_templates:
+      - "--pull"
+      - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+  - id: link-validator-arm64
+    ids:
+      - link-validator
+    use: buildx
+    goos: linux
+    goarch: arm64
+    image_templates:
+      - joshbeard/link-validator:{{ .Tag }}-arm64
+      - joshbeard/link-validator:latest-arm64
+      - ghcr.io/joshbeard/link-validator/link-validator:{{ .Tag }}-arm64
+      - ghcr.io/joshbeard/link-validator/link-validator:latest-arm64
+    extra_files:
+      - "entrypoint.sh"
+    build_flag_templates:
+      - "--pull"
+      - "--platform=linux/arm64/v8"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+
+docker_manifests:
+  - name_template: joshbeard/link-validator:{{ .Tag }}
+    image_templates:
+      - joshbeard/link-validator:{{ .Tag }}-amd64
+      - joshbeard/link-validator:{{ .Tag }}-arm64
+  - name_template: joshbeard/link-validator:latest
+    image_templates:
+      - joshbeard/link-validator:latest-amd64
+      - joshbeard/link-validator:latest-arm64
+  - name_template: ghcr.io/joshbeard/link-validator/link-validator:{{ .Tag }}
+    image_templates:
+      - ghcr.io/joshbeard/link-validator/link-validator:{{ .Tag }}-amd64
+      - ghcr.io/joshbeard/link-validator/link-validator:{{ .Tag }}-arm64
+  - name_template: ghcr.io/joshbeard/link-validator/link-validator:latest
+    image_templates:
+      - ghcr.io/joshbeard/link-validator/link-validator:latest-amd64
+      - ghcr.io/joshbeard/link-validator/link-validator:latest-arm64
+
+nfpms:
+  - id: 'testpkg'
+    vendor: "Josh Beard"
+    maintainer: "Josh Beard <josh@jbeard.dev>"
+    homepage: "http://github.com/joshbeard/link-validator"
+    license: "MIT"
+    description: Validate links in a website
+    #prerelease: beta1
+    release: "1"
+    priority: "extra"
+    section: vcs
+    formats:
+      - apk
+      - deb
+      - rpm
+      - archlinux
+    rpm:
+      signature:
+        key_file: key.gpg
+    deb:
+      signature:
+        key_file: key.gpg
+    # FIXME: gpg signing apk
+    apk: {}
+    archlinux:
+      packager: Josh Beard <josh@jbeard.dev>
