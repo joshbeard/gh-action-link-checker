@@ -12,9 +12,46 @@ It supports both sitemap-based checking and web crawling.
 - 📊 Detailed reporting with JSON output
 - 🔧 Highly configurable
 
-## Usage
+## Installation & Usage
 
-### Using with Sitemap
+### GitHub Action
+
+Use directly in your GitHub workflows:
+
+```yaml
+- name: Check links
+  uses: joshbeard/gh-action-link-checker@v1
+  with:
+    sitemap-url: 'https://example.com/sitemap.xml'
+```
+
+### Docker Image
+
+Available on GitHub Container Registry and Docker Hub:
+
+```bash
+# From GitHub Container Registry
+docker run --rm ghcr.io/joshbeard/link-checker:latest \
+  --sitemap-url https://example.com/sitemap.xml
+
+# From Docker Hub
+docker run --rm joshbeard/link-checker:latest \
+  --sitemap-url https://example.com/sitemap.xml
+```
+
+### Binary Releases
+
+Download pre-built binaries from [GitHub Releases](https://github.com/joshbeard/gh-action-link-checker/releases):
+
+```bash
+curl -L https://github.com/joshbeard/gh-action-link-checker/releases/latest/download/link-checker-linux-amd64 -o link-checker
+chmod +x link-checker
+./link-checker --sitemap-url https://example.com/sitemap.xml
+```
+
+## Examples
+
+### GitHub Action - Sitemap
 
 ```yaml
 name: Check Links
@@ -28,15 +65,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check links from sitemap
-        uses: ./
+        uses: joshbeard/gh-action-link-checker@v1
         with:
-          sitemap-url: 'https://joshbeard.me/sitemap.xml'
+          sitemap-url: 'https://example.com/sitemap.xml'
           timeout: 30
           max-concurrent: 10
           exclude-patterns: '.*\.pdf$,.*example\.com.*'
 ```
 
-### Using with Web Crawling
+### GitHub Action - Web Crawling
 
 ```yaml
 name: Check Links
@@ -49,7 +86,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check links by crawling
-        uses: ./
+        uses: joshbeard/gh-action-link-checker@v1
         with:
           base-url: 'https://example.com'
           max-depth: 3
@@ -58,7 +95,31 @@ jobs:
           fail-on-error: true
 ```
 
-### Complete Example with Error Handling
+### GitLab CI
+
+```yaml
+link-check:
+  stage: test
+  image: ghcr.io/joshbeard/link-checker:latest
+  script:
+    - link-checker --sitemap-url https://example.com/sitemap.xml --timeout 30 --max-concurrent 5
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+```
+
+### Docker with Custom Configuration
+
+```bash
+docker run --rm ghcr.io/joshbeard/link-checker:latest \
+  --base-url https://example.com \
+  --max-depth 2 \
+  --timeout 60 \
+  --exclude-patterns ".*\.pdf$,.*\.zip$" \
+  --verbose
+```
+
+### Complete GitHub Action with Error Handling
 
 ```yaml
 name: Link Checker
@@ -76,9 +137,9 @@ jobs:
 
       - name: Check website links
         id: link-check
-        uses: ./
+        uses: joshbeard/gh-action-link-checker@v1
         with:
-          sitemap-url: 'https://joshbeard.me/sitemap.xml'
+          sitemap-url: 'https://example.com/sitemap.xml'
           timeout: 30
           user-agent: 'MyBot/1.0'
           exclude-patterns: '.*\.pdf$,.*\.zip$,.*example\.com.*'
@@ -103,7 +164,9 @@ jobs:
             console.log(comment);
 ```
 
-## Inputs
+## Configuration
+
+### Inputs (GitHub Action)
 
 | Input | Description | Required | Default |
 |-------|-------------|----------|---------|
@@ -117,7 +180,23 @@ jobs:
 | `max-concurrent` | Maximum number of concurrent requests | No | `10` |
 | `verbose` | Show detailed output for each link checked | No | `false` |
 
-## Outputs
+### Command Line Flags
+
+When using the binary or Docker image, use these flags:
+
+```bash
+--sitemap-url string       URL to sitemap.xml
+--base-url string          Base URL to crawl
+--max-depth int            Maximum crawl depth (default 3)
+--timeout int              Request timeout in seconds (default 30)
+--user-agent string        User agent string
+--exclude-patterns string  Comma-separated exclude patterns
+--max-concurrent int       Max concurrent requests (default 10)
+--verbose                  Show detailed output
+--help                     Show help
+```
+
+### Outputs (GitHub Action)
 
 | Output | Description |
 |--------|-------------|
@@ -125,7 +204,7 @@ jobs:
 | `broken-links` | JSON array of broken links with details |
 | `total-links-checked` | Total number of links checked |
 
-## Examples
+## Advanced Usage
 
 ### Exclude Patterns
 
@@ -142,16 +221,9 @@ This will exclude:
 - Any URLs containing "example.com"
 - Any URLs with fragments (anchors)
 
-### Custom User Agent
-
-```yaml
-with:
-  user-agent: 'MyWebsite-LinkChecker/1.0 (+https://example.com/about)'
-```
-
 ### Rate Limiting
 
-Control the number of concurrent requests to be respectful to the target server:
+Control concurrent requests to be respectful to target servers:
 
 ```yaml
 with:
@@ -182,44 +254,16 @@ Status emojis:
 - 💥 Server Error (5xx)
 - ❓ Unknown/Error
 
-## Local Testing
-
-You can test the action locally using Docker:
-
-```bash
-# Test with sitemap
-docker build -t link-checker .
-docker run --rm \
-  -e INPUT_SITEMAP-URL=https://joshbeard.me/sitemap.xml \
-  -e INPUT_TIMEOUT=30 \
-  -e INPUT_MAX-CONCURRENT=5 \
-  -e INPUT_VERBOSE=true \
-  link-checker
-
-# Test with crawling
-docker run --rm \
-  -e INPUT_BASE-URL=https://example.com \
-  -e INPUT_MAX-DEPTH=2 \
-  -e INPUT_TIMEOUT=30 \
-  -e INPUT_VERBOSE=true \
-  link-checker
-```
-
 ## Development
 
-This action is built with Go and uses:
-- `golang.org/x/net/html` for HTML parsing
-- `golang.org/x/time/rate` for rate limiting
-- Standard library for HTTP requests and XML parsing
-
-To build locally:
+### Building
 
 ```bash
 go mod tidy
 go build -o link-checker ./cmd/link-checker
 ```
 
-Or use the provided Makefile:
+Or use the Makefile:
 
 ```bash
 make build    # Build the binary
@@ -229,36 +273,13 @@ make help     # See all available targets
 
 ### Testing
 
-The project includes comprehensive tests for all components:
+Run the test suite:
 
 ```bash
-# Run all tests
-go test ./...
-
-# Run tests with coverage
-go test ./... -cover
-
-# Run tests with verbose output
-go test ./... -v
-
-# Run specific package tests
-go test ./internal/config -v
-go test ./internal/checker -v
-go test ./cmd/link-checker -v
+go test ./...              # Run all tests
+go test ./... -cover       # Run with coverage
+go test ./... -v           # Verbose output
 ```
-
-Test coverage:
-- **Config package**: 100% coverage
-- **Checker package**: ~70% coverage
-- **Main package**: ~18% coverage (integration tests)
-
-The tests cover:
-- Configuration parsing and validation
-- Sitemap parsing and URL extraction
-- Link checking with various HTTP status codes
-- URL resolution and exclusion patterns
-- Error handling and edge cases
-- GitHub Action output formatting
 
 ## License
 
