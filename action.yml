@@ -1,0 +1,50 @@
+name: 'Link Checker'
+description: 'Check for broken links (4xx, 5xx) on a website using sitemap or crawling'
+author: 'Josh Beard'
+
+inputs:
+  sitemap-url:
+    description: 'URL to sitemap.xml to check links from'
+    required: false
+  base-url:
+    description: 'Base URL to crawl for links (used if sitemap-url not provided)'
+    required: false
+  max-depth:
+    description: 'Maximum crawl depth when using base-url'
+    required: false
+    default: '3'
+  timeout:
+    description: 'Request timeout in seconds'
+    required: false
+    default: '30'
+  user-agent:
+    description: 'User agent string for requests'
+    required: false
+    default: 'GitHub-Action-Link-Checker/1.0'
+  exclude-patterns:
+    description: 'Comma-separated list of URL patterns to exclude (regex supported)'
+    required: false
+  fail-on-error:
+    description: 'Whether to fail the action if broken links are found'
+    required: false
+    default: 'true'
+  max-concurrent:
+    description: 'Maximum number of concurrent requests'
+    required: false
+    default: '10'
+  verbose:
+    description: 'Show detailed output for each link checked'
+    required: false
+    default: 'false'
+
+outputs:
+  broken-links-count:
+    description: 'Number of broken links found'
+  broken-links:
+    description: 'JSON array of broken links with details'
+  total-links-checked:
+    description: 'Total number of links checked'
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'

@@ -1,0 +1,105 @@
+name: Link Checker Example
+
+on:
+  schedule:
+    - cron: '0 2 * * 1'  # Weekly on Monday at 2 AM
+  workflow_dispatch:      # Allow manual triggering
+  push:
+    branches: [main]
+
+jobs:
+  check-links:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check website links from sitemap
+        id: link-check
+        uses: ./
+        with:
+          sitemap-url: 'https://joshbeard.me/sitemap.xml'
+          timeout: 30
+          user-agent: 'GitHub-Action-Link-Checker/1.0 (+https://github.com/joshbeard/gh-action-link-checker)'
+          exclude-patterns: '.*\.pdf$,.*\.zip$'
+          max-concurrent: 10
+          verbose: true
+          fail-on-error: false  # Don't fail the workflow, just report
+
+      - name: Create issue if broken links found
+        if: steps.link-check.outputs.broken-links-count > 0
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const brokenLinks = JSON.parse('${{ steps.link-check.outputs.broken-links }}');
+            const count = '${{ steps.link-check.outputs.broken-links-count }}';
+            const total = '${{ steps.link-check.outputs.total-links-checked }}';
+
+            let body = `## 🔗 Broken Links Report\n\n`;
+            body += `Found **${count}** broken link(s) out of **${total}** total links checked.\n\n`;
+            body += `### Broken Links:\n\n`;
+
+            brokenLinks.forEach(link => {
+              body += `- ❌ [${link.url}](${link.url})\n`;
+              body += `  - **Status:** ${link.status_code}\n`;
+              body += `  - **Error:** ${link.error}\n`;
+              body += `  - **Duration:** ${link.duration}\n\n`;
+            });
+
+            body += `\n---\n*This issue was automatically created by the Link Checker action.*`;
+
+            // Check if there's already an open issue
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: ['broken-links']
+            });
+
+            if (issues.data.length > 0) {
+              // Update existing issue
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issues.data[0].number,
+                body: body
+              });
+            } else {
+              // Create new issue
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `🔗 Broken Links Found (${count} links)`,
+                body: body,
+                labels: ['broken-links', 'bug']
+              });
+            }
+
+      - name: Close broken links issue if no broken links
+        if: steps.link-check.outputs.broken-links-count == 0
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Close any open broken-links issues since all links are working
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: ['broken-links']
+            });
+
+            for (const issue of issues.data) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: 'closed'
+              });
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: '✅ All links are now working! Closing this issue.'
+              });
+            }
