@@ -1,6 +1,6 @@
-# Link Checker GitHub Action
+# Link Validator
 
-A GitHub Action to check for broken links (4xx, 5xx status codes) on websites.
+A tool and GitHub Action to check for broken links (4xx, 5xx status codes) on websites.
 It supports both sitemap-based checking and web crawling.
 
 ## Features
@@ -218,6 +218,47 @@ To build locally:
 go mod tidy
 go build -o link-checker ./cmd/link-checker
 ```
+
+Or use the provided Makefile:
+
+```bash
+make build    # Build the binary
+make test     # Run tests
+make help     # See all available targets
+```
+
+### Testing
+
+The project includes comprehensive tests for all components:
+
+```bash
+# Run all tests
+go test ./...
+
+# Run tests with coverage
+go test ./... -cover
+
+# Run tests with verbose output
+go test ./... -v
+
+# Run specific package tests
+go test ./internal/config -v
+go test ./internal/checker -v
+go test ./cmd/link-checker -v
+```
+
+Test coverage:
+- **Config package**: 100% coverage
+- **Checker package**: ~70% coverage
+- **Main package**: ~18% coverage (integration tests)
+
+The tests cover:
+- Configuration parsing and validation
+- Sitemap parsing and URL extraction
+- Link checking with various HTTP status codes
+- URL resolution and exclusion patterns
+- Error handling and edge cases
+- GitHub Action output formatting
 
 ## License
 

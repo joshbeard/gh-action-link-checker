@@ -1,4 +1,4 @@
-name: Link Checker Example
+name: Link Validator
 
 on:
   schedule:
@@ -20,7 +20,7 @@ jobs:
         with:
           sitemap-url: 'https://joshbeard.me/sitemap.xml'
           timeout: 30
-          user-agent: 'GitHub-Action-Link-Checker/1.0 (+https://github.com/joshbeard/gh-action-link-checker)'
+          user-agent: 'GitHub-Action-Link-Validator/1.0 (+https://github.com/joshbeard/link-validator)'
           exclude-patterns: '.*\.pdf$,.*\.zip$'
           max-concurrent: 10
           verbose: true
