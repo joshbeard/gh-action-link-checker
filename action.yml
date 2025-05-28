@@ -20,7 +20,7 @@ inputs:
   user-agent:
     description: 'User agent string for requests'
     required: false
-    default: 'GitHub-Action-Link-Validator/1.0'
+    default: 'Link-Validator/1.0'
   exclude-patterns:
     description: 'Comma-separated list of URL patterns to exclude (regex supported)'
     required: false

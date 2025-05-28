@@ -24,18 +24,18 @@ type Config struct {
 // FromEnvironment creates a Config from GitHub Action environment variables
 func FromEnvironment() *Config {
 	cfg := &Config{
-		SitemapURL:    getEnv("INPUT_SITEMAP-URL", ""),
-		BaseURL:       getEnv("INPUT_BASE-URL", ""),
-		MaxDepth:      getEnvInt("INPUT_MAX-DEPTH", 3),
+		SitemapURL:    getEnv("INPUT_SITEMAP_URL", ""),
+		BaseURL:       getEnv("INPUT_BASE_URL", ""),
+		MaxDepth:      getEnvInt("INPUT_MAX_DEPTH", 3),
 		Timeout:       time.Duration(getEnvInt("INPUT_TIMEOUT", 30)) * time.Second,
-		UserAgent:     getEnv("INPUT_USER-AGENT", "GitHub-Action-Link-Checker/1.0"),
-		FailOnError:   getEnvBool("INPUT_FAIL-ON-ERROR", true),
-		MaxConcurrent: getEnvInt("INPUT_MAX-CONCURRENT", 10),
+		UserAgent:     getEnv("INPUT_USER_AGENT", "GitHub-Action-Link-Checker/1.0"),
+		FailOnError:   getEnvBool("INPUT_FAIL_ON_ERROR", true),
+		MaxConcurrent: getEnvInt("INPUT_MAX_CONCURRENT", 10),
 		Verbose:       getEnvBool("INPUT_VERBOSE", false),
 	}
 
 	// Parse exclude patterns
-	excludeStr := getEnv("INPUT_EXCLUDE-PATTERNS", "")
+	excludeStr := getEnv("INPUT_EXCLUDE_PATTERNS", "")
 	if excludeStr != "" {
 		patterns := strings.Split(excludeStr, ",")
 		for _, pattern := range patterns {

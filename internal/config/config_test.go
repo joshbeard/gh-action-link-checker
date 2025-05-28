@@ -10,14 +10,14 @@ func TestFromEnvironment(t *testing.T) {
 	// Save original environment
 	originalEnv := make(map[string]string)
 	envVars := []string{
-		"INPUT_SITEMAP-URL",
-		"INPUT_BASE-URL",
-		"INPUT_MAX-DEPTH",
+		"INPUT_SITEMAP_URL",
+		"INPUT_BASE_URL",
+		"INPUT_MAX_DEPTH",
 		"INPUT_TIMEOUT",
-		"INPUT_USER-AGENT",
-		"INPUT_EXCLUDE-PATTERNS",
-		"INPUT_FAIL-ON-ERROR",
-		"INPUT_MAX-CONCURRENT",
+		"INPUT_USER_AGENT",
+		"INPUT_EXCLUDE_PATTERNS",
+		"INPUT_FAIL_ON_ERROR",
+		"INPUT_MAX_CONCURRENT",
 		"INPUT_VERBOSE",
 	}
 
@@ -70,14 +70,14 @@ func TestFromEnvironment(t *testing.T) {
 	})
 
 	t.Run("custom values", func(t *testing.T) {
-		os.Setenv("INPUT_SITEMAP-URL", "https://example.com/sitemap.xml")
-		os.Setenv("INPUT_BASE-URL", "https://example.com")
-		os.Setenv("INPUT_MAX-DEPTH", "5")
+		os.Setenv("INPUT_SITEMAP_URL", "https://example.com/sitemap.xml")
+		os.Setenv("INPUT_BASE_URL", "https://example.com")
+		os.Setenv("INPUT_MAX_DEPTH", "5")
 		os.Setenv("INPUT_TIMEOUT", "60")
-		os.Setenv("INPUT_USER-AGENT", "CustomBot/1.0")
-		os.Setenv("INPUT_EXCLUDE-PATTERNS", ".*\\.pdf$,.*example\\.com.*")
-		os.Setenv("INPUT_FAIL-ON-ERROR", "false")
-		os.Setenv("INPUT_MAX-CONCURRENT", "20")
+		os.Setenv("INPUT_USER_AGENT", "CustomBot/1.0")
+		os.Setenv("INPUT_EXCLUDE_PATTERNS", ".*\\.pdf$,.*example\\.com.*")
+		os.Setenv("INPUT_FAIL_ON_ERROR", "false")
+		os.Setenv("INPUT_MAX_CONCURRENT", "20")
 		os.Setenv("INPUT_VERBOSE", "true")
 
 		cfg := FromEnvironment()
@@ -112,10 +112,10 @@ func TestFromEnvironment(t *testing.T) {
 	})
 
 	t.Run("invalid values fallback to defaults", func(t *testing.T) {
-		os.Setenv("INPUT_MAX-DEPTH", "invalid")
+		os.Setenv("INPUT_MAX_DEPTH", "invalid")
 		os.Setenv("INPUT_TIMEOUT", "not-a-number")
-		os.Setenv("INPUT_FAIL-ON-ERROR", "maybe")
-		os.Setenv("INPUT_MAX-CONCURRENT", "abc")
+		os.Setenv("INPUT_FAIL_ON_ERROR", "maybe")
+		os.Setenv("INPUT_MAX_CONCURRENT", "abc")
 		os.Setenv("INPUT_VERBOSE", "yes")
 
 		cfg := FromEnvironment()
@@ -140,17 +140,17 @@ func TestFromEnvironment(t *testing.T) {
 
 func TestExcludePatterns(t *testing.T) {
 	// Save and restore environment
-	original := os.Getenv("INPUT_EXCLUDE-PATTERNS")
+	original := os.Getenv("INPUT_EXCLUDE_PATTERNS")
 	defer func() {
 		if original != "" {
-			os.Setenv("INPUT_EXCLUDE-PATTERNS", original)
+			os.Setenv("INPUT_EXCLUDE_PATTERNS", original)
 		} else {
-			os.Unsetenv("INPUT_EXCLUDE-PATTERNS")
+			os.Unsetenv("INPUT_EXCLUDE_PATTERNS")
 		}
 	}()
 
 	t.Run("valid patterns", func(t *testing.T) {
-		os.Setenv("INPUT_EXCLUDE-PATTERNS", ".*\\.pdf$,.*\\.zip$,.*example\\.com.*")
+		os.Setenv("INPUT_EXCLUDE_PATTERNS", ".*\\.pdf$,.*\\.zip$,.*example\\.com.*")
 
 		cfg := FromEnvironment()
 
@@ -185,7 +185,7 @@ func TestExcludePatterns(t *testing.T) {
 	})
 
 	t.Run("invalid patterns ignored", func(t *testing.T) {
-		os.Setenv("INPUT_EXCLUDE-PATTERNS", ".*\\.pdf$,[invalid,.*\\.zip$")
+		os.Setenv("INPUT_EXCLUDE_PATTERNS", ".*\\.pdf$,[invalid,.*\\.zip$")
 
 		cfg := FromEnvironment()
 
@@ -196,7 +196,7 @@ func TestExcludePatterns(t *testing.T) {
 	})
 
 	t.Run("empty patterns", func(t *testing.T) {
-		os.Setenv("INPUT_EXCLUDE-PATTERNS", "")
+		os.Setenv("INPUT_EXCLUDE_PATTERNS", "")
 
 		cfg := FromEnvironment()
 
