@@ -18,7 +18,7 @@
 go.work
 
 # Built binary
-link-checker
+/link-checker
 
 # IDE files
 .vscode/
