@@ -7,7 +7,7 @@ require (
 	github.com/golangci/golangci-lint v1.64.8
 	github.com/segmentio/golines v0.12.2
 	golang.org/x/net v0.40.0
-	golang.org/x/time v0.11.0
+	golang.org/x/time v0.12.0
 	golang.org/x/vuln v1.1.4
 	mvdan.cc/gofumpt v0.8.0
 )
